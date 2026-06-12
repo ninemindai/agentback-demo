@@ -2,7 +2,8 @@
 
 An MCP server built on [AgentBack](https://agentback.dev) that exposes weather
 data from the free [Open-Meteo](https://open-meteo.com) API — **no API key
-required**. Decorator-driven tools with Zod input/output schemas over stdio.
+required**. Decorator-driven tools with Zod input/output schemas, served over
+stdio, Streamable HTTP, or a dev console from one set of DI wiring.
 
 ```bash
 npm install
@@ -74,15 +75,28 @@ geocoded automatically; pass coordinates directly to skip that step.
 - **`src/schemas.ts`** — the single source of truth. Each Zod schema is
   simultaneously the runtime validator, the `z.infer` type, and the
   agent-visible MCP input/output schema.
-- **`src/weather-service.ts`** — `WeatherService`, a stateless Open-Meteo client
-  (geocoding + current/forecast), bound in DI as `services.weather`.
-- **`src/tools/weather.tools.ts`** — `@mcpServer()`-tagged tool class; each
-  `@tool` carries its input/output schema and delegates to the injected service.
-- **`src/application.ts`** — mounts `MCPComponent`, binds the service, and
-  registers the tool class with `app.controller(...)` so the MCP dispatcher
-  resolves it **with constructor injection** (a class registered via
-  `app.service(...)` is instantiated with `new` and would not get the injected
-  service).
+- **`src/keys.ts`** — typed DI keys. `WEATHER_SERVICE =
+  BindingKey.create<WeatherService>('services.weather')` ties the key to its
+  type, so the binding and every `@inject(WEATHER_SERVICE)` are type-checked.
+- **`src/weather-service.ts`** — `WeatherService`, a stateless Open-Meteo client.
+  `@injectable` declares its own binding: the `WEATHER_SERVICE` key
+  (`ContextTags.KEY`) and singleton scope — it's pure I/O, so one shared
+  instance is reused.
+- **`src/tools/weather.tools.ts`** — the `@mcpServer()` tool class. `@mcpServer`
+  is built on `@injectable`: it makes the class an _extension_ of the
+  `MCP_SERVERS` extension point (singleton by default). Each `@tool` carries its
+  Zod schemas and delegates to the injected `WeatherService`.
+- **`src/component.ts`** — `WeatherComponent` packages the static DI
+  contributions in one manifest: `MCPComponent` plus both `services`
+  (`WeatherTools`, `WeatherService`). A tool class is a plain service — the MCP
+  server discovers it as an `MCP_SERVERS` extension and resolves it through its
+  binding, so constructor `@inject` is honored (no `controller` needed).
+- **`src/wiring.ts`** — `registerWeatherMcp(app, stdio)` adds `WeatherComponent`
+  and applies the per-entry transport config (stdio on/off). Shared by all three
+  entry points, so they stay in lockstep.
+- **`src/serve-http.ts`** — exports `buildHttpApp()` (builds, doesn't start) so
+  tests can drive the api-key auth + rate-limit gate; the CLI run is guarded by
+  `isMain(import.meta)`.
 
 ## Claude Desktop / Cursor config
 
