@@ -7,6 +7,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "start": "node dist/main.js",
+    "console": "node dist/console.js",
     "test": "vitest run",
     "clean": "rm -rf dist"
   },
@@ -17,6 +18,8 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@agentback/console": "^0.1.1",
+    "@agentback/rest": "^0.1.1",
     "@agentback/testing": "^0.1.0",
     "@types/node": "^24.0.0",
     "typescript": "^5.9.0",

@@ -8,7 +8,20 @@ required**. Decorator-driven tools with Zod input/output schemas over stdio.
 npm install
 npm run build && npm start      # stdio MCP server
 npm test                        # in-memory MCP session, no process spawn
+npm run console                 # dev web UI at http://localhost:3000/console
 ```
+
+## Dev console
+
+`npm run console` starts the [AgentBack console](https://agentback.dev) — a web
+UI that composes the **MCP inspector** (list and invoke your tools from a form),
+the **OpenAPI/Swagger explorer**, and a **DI context explorer**. Override the
+port with `PORT=3737 npm run console`.
+
+The console serves over HTTP, so it runs a `RestApplication` (`src/console.ts`)
+that reuses the exact same tool wiring as the stdio server (`src/wiring.ts`).
+It's a development tool — the stdio entry point (`src/main.ts`) is what you wire
+into Claude Desktop / Cursor.
 
 ## Tools
 
