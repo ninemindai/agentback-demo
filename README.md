@@ -6,10 +6,31 @@ required**. Decorator-driven tools with Zod input/output schemas over stdio.
 
 ```bash
 npm install
-npm run build && npm start      # stdio MCP server
+npm run build && npm start      # stdio MCP server (for Claude Desktop / Cursor)
+npm run serve:http              # remote MCP server over HTTP at /mcp
 npm test                        # in-memory MCP session, no process spawn
 npm run console                 # dev web UI at http://localhost:3000/console
 ```
+
+## Transports
+
+The same tools and DI wiring (`src/wiring.ts`) are served three ways:
+
+| Entry | Command | Transport | Use |
+| ----- | ------- | --------- | --- |
+| `src/main.ts` | `npm start` | stdio | Local — wire into Claude Desktop / Cursor. |
+| `src/serve-http.ts` | `npm run serve:http` | Streamable HTTP at `POST/GET/DELETE /mcp` | Remote clients over the network. |
+| `src/console.ts` | `npm run console` | HTTP web UI | Development inspector (see below). |
+
+### HTTP transport
+
+`npm run serve:http` exposes the server at `http://localhost:3000/mcp`
+(`PORT=3939 npm run serve:http` to change the port). Point any Streamable-HTTP
+MCP client at that URL.
+
+> **This minimal HTTP server is unauthenticated.** Before exposing it publicly,
+> pass `strategyAuth`/`auth`, `rateLimit`, and `allowedHosts`/`allowedOrigins`
+> to `installMcpHttp` in `src/serve-http.ts`.
 
 ## Dev console
 
