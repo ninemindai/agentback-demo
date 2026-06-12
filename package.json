@@ -15,8 +15,8 @@
   },
   "dependencies": {
     "@agentback/authentication": "^0.1.1",
-    "@agentback/core": "^0.1.0",
-    "@agentback/mcp": "^0.1.0",
+    "@agentback/core": "^0.1.1",
+    "@agentback/mcp": "^0.1.1",
     "@agentback/mcp-http": "^0.1.1",
     "@agentback/rest": "^0.1.1",
     "@agentback/security": "^0.1.1",
@@ -25,7 +25,7 @@
   },
   "devDependencies": {
     "@agentback/console": "^0.1.1",
-    "@agentback/testing": "^0.1.0",
+    "@agentback/testing": "^0.1.1",
     "@types/node": "^24.0.0",
     "typescript": "^5.9.0",
     "vitest": "^4.1.0"
