@@ -1,7 +1,8 @@
 import {z} from 'zod';
 import {inject} from '@agentback/core';
 import {mcpServer, tool} from '@agentback/mcp';
-import {WeatherService} from '../weather-service.js';
+import type {WeatherService} from '../weather-service.js';
+import {WEATHER_SERVICE} from '../keys.js';
 import {
   CurrentWeatherInput,
   CurrentWeatherOutput,
@@ -13,14 +14,15 @@ import {
 
 /**
  * Weather tool surface. `@mcpServer()` tags the class so the MCP server
- * discovers it at startup; `WeatherService` is injected from `services.weather`.
+ * discovers it at startup; `WeatherService` is injected via the typed
+ * `WEATHER_SERVICE` key (see `keys.ts`).
  *
  * Each `@tool` carries its Zod input/output schemas directly — the same schema
  * is the validator, the agent-visible `inputSchema`, and the runtime output check.
  */
 @mcpServer()
 export class WeatherTools {
-  constructor(@inject('services.weather') private weather: WeatherService) {}
+  constructor(@inject(WEATHER_SERVICE) private weather: WeatherService) {}
 
   @tool('geocode_location', {
     title: 'Geocode a place name',
