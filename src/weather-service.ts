@@ -1,5 +1,7 @@
 // Open-Meteo client: geocoding + current/forecast weather.
 // No API key required — https://open-meteo.com.
+import {injectable, BindingScope, ContextTags} from '@agentback/core';
+import {WEATHER_SERVICE} from './keys.js';
 import type {
   CurrentWeatherInputT,
   CurrentWeatherOutputT,
@@ -72,9 +74,16 @@ async function getJson<T>(url: string, params: Record<string, string | number>):
 }
 
 /**
- * Stateless weather service. Registered in DI under `services.weather` and
- * injected into the MCP tool class. Pure I/O — no per-request state.
+ * Stateless weather service. `@injectable` declares its own binding: the
+ * `WEATHER_SERVICE` key (`services.weather`) and singleton scope — it's pure
+ * I/O with no per-request state, so one shared instance is reused. The
+ * `WeatherComponent` registers it via its `services` array, which reads this
+ * metadata.
  */
+@injectable({
+  scope: BindingScope.SINGLETON,
+  tags: {[ContextTags.KEY]: WEATHER_SERVICE.key},
+})
 export class WeatherService {
   /** Search a free-text place name and return ranked coordinate candidates. */
   async geocode(query: string, count: number): Promise<GeocodeOutputT> {
