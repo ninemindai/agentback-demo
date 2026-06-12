@@ -28,9 +28,22 @@ The same tools and DI wiring (`src/wiring.ts`) are served three ways:
 (`PORT=3939 npm run serve:http` to change the port). Point any Streamable-HTTP
 MCP client at that URL.
 
-> **This minimal HTTP server is unauthenticated.** Before exposing it publicly,
-> pass `strategyAuth`/`auth`, `rateLimit`, and `allowedHosts`/`allowedOrigins`
-> to `installMcpHttp` in `src/serve-http.ts`.
+**Auth:** every request needs a valid API key in the `x-api-key` header (or
+`?apiKey=`). Keys come from `MCP_API_KEYS` (comma-separated); if unset, a
+`dev-local-key` is generated and printed to stderr so local runs still work.
+
+```bash
+MCP_API_KEYS=key1,key2 PORT=3939 npm run serve:http
+# client must send:  x-api-key: key1
+```
+
+**Rate limiting:** `tools/call` is throttled per (caller, tool) — 60/min by
+default, with `get_forecast` capped tighter at 20/min. Over the limit returns a
+JSON-RPC 429 with `Retry-After`. Both are configured in `src/serve-http.ts`.
+
+> For public deployment also set `allowedHosts`/`allowedOrigins` on
+> `installMcpHttp` (DNS-rebinding protection), and consider a Redis `store` for
+> the rate limiter so buckets are shared across instances.
 
 ## Dev console
 
