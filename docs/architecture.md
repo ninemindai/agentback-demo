@@ -5,9 +5,11 @@ weather data as MCP tools, served three ways from a single DI wiring. The code
 is organized into five layers with dependencies flowing strictly **downward**:
 Transports → Composition → Adapter → Domain → Contracts.
 
-> A polished, exportable version of this diagram lives at
-> [`docs/architecture-diagram.html`](./architecture-diagram.html) — open it in a
-> browser (PNG/PDF export built in).
+![weather-mcp architecture](./architecture-diagram.png)
+
+> The image above is the rendered view. An interactive, exportable version lives
+> at [`docs/architecture-diagram.html`](./architecture-diagram.html) (PNG/PDF
+> export built in); the Mermaid block below is the editable source.
 
 ## Module dependency graph
 

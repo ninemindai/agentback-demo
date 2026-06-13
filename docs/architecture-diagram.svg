@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 780"><rect width="100%" height="100%" fill="#020617"/>
+        <defs>
+          <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#64748b"></polygon>
+          </marker>
+          <marker id="arrowhead-cyan" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#22d3ee"></polygon>
+          </marker>
+          <marker id="arrowhead-amber" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#fbbf24"></polygon>
+          </marker>
+          <marker id="arrowhead-emerald" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#34d399"></polygon>
+          </marker>
+          <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e293b" stroke-width="0.5"></path>
+          </pattern>
+        </defs>
+
+        <!-- Background grid -->
+        <rect width="100%" height="100%" fill="url(#grid)"></rect>
+
+        <!-- ============ LAYER LANES ============ -->
+        <rect x="16" y="44" width="968" height="82" rx="10" fill="rgba(148,163,184,0.04)" stroke="#1e293b" stroke-width="1" stroke-dasharray="6,5"></rect>
+        <text x="30" y="60" fill="#475569" font-size="9" font-weight="600" letter-spacing="1">① MCP CLIENTS</text>
+
+        <rect x="16" y="134" width="968" height="104" rx="10" fill="rgba(34,211,238,0.04)" stroke="#1e293b" stroke-width="1" stroke-dasharray="6,5"></rect>
+        <text x="30" y="150" fill="#475569" font-size="9" font-weight="600" letter-spacing="1">② TRANSPORTS</text>
+
+        <rect x="16" y="246" width="968" height="104" rx="10" fill="rgba(251,191,36,0.04)" stroke="#1e293b" stroke-width="1" stroke-dasharray="6,5"></rect>
+        <text x="30" y="262" fill="#475569" font-size="9" font-weight="600" letter-spacing="1">③ COMPOSITION ROOT — src/</text>
+
+        <rect x="16" y="358" width="968" height="92" rx="10" fill="rgba(167,139,250,0.04)" stroke="#1e293b" stroke-width="1" stroke-dasharray="6,5"></rect>
+        <text x="30" y="374" fill="#475569" font-size="9" font-weight="600" letter-spacing="1">④ ADAPTER — MCP TOOLS</text>
+
+        <rect x="16" y="458" width="968" height="92" rx="10" fill="rgba(52,211,153,0.04)" stroke="#1e293b" stroke-width="1" stroke-dasharray="6,5"></rect>
+        <text x="30" y="474" fill="#475569" font-size="9" font-weight="600" letter-spacing="1">⑤ DOMAIN</text>
+
+        <rect x="16" y="558" width="968" height="92" rx="10" fill="rgba(251,113,133,0.04)" stroke="#1e293b" stroke-width="1" stroke-dasharray="6,5"></rect>
+        <text x="30" y="574" fill="#475569" font-size="9" font-weight="600" letter-spacing="1">⑥ CONTRACTS — Zod SSOT + DI keys</text>
+
+        <!-- ============ ARROWS (drawn before boxes) ============ -->
+
+        <!-- Clients -> Transports (cyan, call flow) -->
+        <line x1="185" y1="110" x2="185" y2="156" stroke="#22d3ee" stroke-width="1.5" marker-end="url(#arrowhead-cyan)"></line>
+        <line x1="500" y1="110" x2="500" y2="156" stroke="#22d3ee" stroke-width="1.5" marker-end="url(#arrowhead-cyan)"></line>
+        <line x1="815" y1="110" x2="815" y2="156" stroke="#22d3ee" stroke-width="1.5" marker-end="url(#arrowhead-cyan)"></line>
+
+        <!-- Transports -> Composition (amber, wiring) -->
+        <line x1="183" y1="222" x2="178" y2="268" stroke="#fbbf24" stroke-width="1.5" marker-end="url(#arrowhead-amber)"></line>
+        <line x1="500" y1="222" x2="500" y2="268" stroke="#fbbf24" stroke-width="1.5" marker-end="url(#arrowhead-amber)"></line>
+        <line x1="815" y1="222" x2="565" y2="268" stroke="#fbbf24" stroke-width="1.5" marker-end="url(#arrowhead-amber)"></line>
+        <text x="700" y="248" fill="#fbbf24" font-size="8" text-anchor="middle">registerWeatherMcp()</text>
+
+        <!-- application.ts -> wiring.ts -->
+        <line x1="270" y1="300" x2="403" y2="300" stroke="#fbbf24" stroke-width="1.5" marker-end="url(#arrowhead-amber)"></line>
+        <!-- wiring.ts -> component.ts -->
+        <line x1="597" y1="300" x2="728" y2="300" stroke="#fbbf24" stroke-width="1.5" marker-end="url(#arrowhead-amber)"></line>
+
+        <!-- component.ts -> tools / service (DI registration, dashed slate) -->
+        <path d="M 760 330 C 700 352 600 358 562 374" fill="none" stroke="#64748b" stroke-width="1.2" stroke-dasharray="4,4" stroke-opacity="0.7" marker-end="url(#arrowhead)"></path>
+        <path d="M 800 330 C 720 400 600 446 562 474" fill="none" stroke="#64748b" stroke-width="1.2" stroke-dasharray="4,4" stroke-opacity="0.7" marker-end="url(#arrowhead)"></path>
+        <text x="690" y="346" fill="#64748b" font-size="7.5" text-anchor="middle">registers @ MCP_SERVERS</text>
+
+        <!-- tools -> service (emerald, delegates) -->
+        <line x1="500" y1="434" x2="500" y2="474" stroke="#34d399" stroke-width="1.5" marker-end="url(#arrowhead-emerald)"></line>
+        <text x="544" y="458" fill="#34d399" font-size="8" text-anchor="middle">delegates</text>
+
+        <!-- service -> Open-Meteo (emerald, HTTPS) -->
+        <line x1="625" y1="505" x2="718" y2="505" stroke="#34d399" stroke-width="1.5" marker-end="url(#arrowhead-emerald)"></line>
+        <text x="671" y="498" fill="#94a3b8" font-size="8" text-anchor="middle">HTTPS · fetch</text>
+        <text x="671" y="528" fill="#fb7185" font-size="7" text-anchor="middle">global fetch — no fine-grained test seam</text>
+
+        <!-- tools/service -> schemas (rose dashed, contract use) -->
+        <path d="M 560 434 C 700 488 778 520 778 574" fill="none" stroke="#fb7185" stroke-width="1" stroke-dasharray="3,4" stroke-opacity="0.6" marker-end="url(#arrowhead)"></path>
+        <path d="M 625 512 C 700 540 745 556 762 574" fill="none" stroke="#fb7185" stroke-width="1" stroke-dasharray="3,4" stroke-opacity="0.6" marker-end="url(#arrowhead)"></path>
+        <text x="752" y="500" fill="#fb7185" font-size="7.5" text-anchor="middle">Zod I/O schemas</text>
+
+        <!-- tools/service -> keys (rose dashed, DI key use) -->
+        <path d="M 440 434 C 320 488 230 520 232 574" fill="none" stroke="#fb7185" stroke-width="1" stroke-dasharray="3,4" stroke-opacity="0.6" marker-end="url(#arrowhead)"></path>
+        <path d="M 440 512 C 360 540 300 556 270 574" fill="none" stroke="#fb7185" stroke-width="1" stroke-dasharray="3,4" stroke-opacity="0.6" marker-end="url(#arrowhead)"></path>
+        <text x="300" y="500" fill="#fb7185" font-size="7.5" text-anchor="middle">@inject(WEATHER_SERVICE)</text>
+
+        <!-- ============ COMPONENT BOXES (opaque bg + styled) ============ -->
+
+        <!-- ① Clients -->
+        <rect x="80" y="62" width="210" height="48" rx="6" fill="#0f172a"></rect>
+        <rect x="80" y="62" width="210" height="48" rx="6" fill="rgba(30,41,59,0.5)" stroke="#94a3b8" stroke-width="1.5"></rect>
+        <text x="185" y="84" fill="white" font-size="11" font-weight="600" text-anchor="middle">Claude Desktop / Cursor</text>
+        <text x="185" y="99" fill="#94a3b8" font-size="9" text-anchor="middle">local · stdio</text>
+
+        <rect x="395" y="62" width="210" height="48" rx="6" fill="#0f172a"></rect>
+        <rect x="395" y="62" width="210" height="48" rx="6" fill="rgba(30,41,59,0.5)" stroke="#94a3b8" stroke-width="1.5"></rect>
+        <text x="500" y="84" fill="white" font-size="11" font-weight="600" text-anchor="middle">Remote MCP clients</text>
+        <text x="500" y="99" fill="#94a3b8" font-size="9" text-anchor="middle">Streamable HTTP</text>
+
+        <rect x="710" y="62" width="210" height="48" rx="6" fill="#0f172a"></rect>
+        <rect x="710" y="62" width="210" height="48" rx="6" fill="rgba(30,41,59,0.5)" stroke="#94a3b8" stroke-width="1.5"></rect>
+        <text x="815" y="84" fill="white" font-size="11" font-weight="600" text-anchor="middle">Dev browser</text>
+        <text x="815" y="99" fill="#94a3b8" font-size="9" text-anchor="middle">AgentBack console</text>
+
+        <!-- ② Transports -->
+        <rect x="80" y="158" width="210" height="64" rx="6" fill="#0f172a"></rect>
+        <rect x="80" y="158" width="210" height="64" rx="6" fill="rgba(8,51,68,0.4)" stroke="#22d3ee" stroke-width="1.5"></rect>
+        <text x="185" y="182" fill="white" font-size="11" font-weight="600" text-anchor="middle">main.ts</text>
+        <text x="185" y="198" fill="#94a3b8" font-size="9" text-anchor="middle">stdio server</text>
+        <text x="185" y="213" fill="#22d3ee" font-size="8" text-anchor="middle">npm start</text>
+
+        <rect x="395" y="158" width="210" height="64" rx="6" fill="#0f172a"></rect>
+        <rect x="395" y="158" width="210" height="64" rx="6" fill="rgba(8,51,68,0.4)" stroke="#22d3ee" stroke-width="1.5"></rect>
+        <text x="500" y="180" fill="white" font-size="11" font-weight="600" text-anchor="middle">serve-http.ts</text>
+        <text x="500" y="195" fill="#94a3b8" font-size="9" text-anchor="middle">HTTP /mcp · API-key auth</text>
+        <text x="500" y="208" fill="#94a3b8" font-size="9" text-anchor="middle">+ per-(caller,tool) rate limit</text>
+        <text x="500" y="219" fill="#22d3ee" font-size="8" text-anchor="middle">npm run serve:http</text>
+
+        <rect x="710" y="158" width="210" height="64" rx="6" fill="#0f172a"></rect>
+        <rect x="710" y="158" width="210" height="64" rx="6" fill="rgba(8,51,68,0.4)" stroke="#22d3ee" stroke-width="1.5"></rect>
+        <text x="815" y="182" fill="white" font-size="11" font-weight="600" text-anchor="middle">console.ts</text>
+        <text x="815" y="198" fill="#94a3b8" font-size="9" text-anchor="middle">dev inspector UI</text>
+        <text x="815" y="213" fill="#22d3ee" font-size="8" text-anchor="middle">npm run console</text>
+
+        <!-- ③ Composition -->
+        <rect x="80" y="270" width="190" height="60" rx="6" fill="#0f172a"></rect>
+        <rect x="80" y="270" width="190" height="60" rx="6" fill="rgba(120,53,15,0.3)" stroke="#fbbf24" stroke-width="1.5"></rect>
+        <text x="175" y="295" fill="white" font-size="11" font-weight="600" text-anchor="middle">application.ts</text>
+        <text x="175" y="311" fill="#94a3b8" font-size="9" text-anchor="middle">MCPApplication</text>
+
+        <rect x="405" y="270" width="190" height="60" rx="6" fill="#0f172a"></rect>
+        <rect x="405" y="270" width="190" height="60" rx="6" fill="rgba(120,53,15,0.3)" stroke="#fbbf24" stroke-width="2.5"></rect>
+        <text x="500" y="291" fill="white" font-size="11" font-weight="700" text-anchor="middle">wiring.ts</text>
+        <text x="500" y="306" fill="#94a3b8" font-size="9" text-anchor="middle">registerWeatherMcp()</text>
+        <text x="500" y="320" fill="#fbbf24" font-size="8" text-anchor="middle">shared assembly hub</text>
+
+        <rect x="730" y="270" width="190" height="60" rx="6" fill="#0f172a"></rect>
+        <rect x="730" y="270" width="190" height="60" rx="6" fill="rgba(120,53,15,0.3)" stroke="#fbbf24" stroke-width="1.5"></rect>
+        <text x="825" y="295" fill="white" font-size="11" font-weight="600" text-anchor="middle">component.ts</text>
+        <text x="825" y="311" fill="#94a3b8" font-size="9" text-anchor="middle">WeatherComponent</text>
+
+        <!-- ④ Adapter -->
+        <rect x="375" y="376" width="250" height="58" rx="6" fill="#0f172a"></rect>
+        <rect x="375" y="376" width="250" height="58" rx="6" fill="rgba(76,29,149,0.4)" stroke="#a78bfa" stroke-width="1.5"></rect>
+        <text x="500" y="399" fill="white" font-size="11" font-weight="600" text-anchor="middle">tools/weather.tools.ts</text>
+        <text x="500" y="415" fill="#94a3b8" font-size="9" text-anchor="middle">@mcpServer · @tool</text>
+        <text x="500" y="428" fill="#a78bfa" font-size="8" text-anchor="middle">geocode · current · forecast</text>
+
+        <!-- ⑤ Domain -->
+        <rect x="375" y="476" width="250" height="58" rx="6" fill="#0f172a"></rect>
+        <rect x="375" y="476" width="250" height="58" rx="6" fill="rgba(6,78,59,0.4)" stroke="#34d399" stroke-width="1.5"></rect>
+        <text x="500" y="499" fill="white" font-size="11" font-weight="600" text-anchor="middle">weather-service.ts</text>
+        <text x="500" y="515" fill="#94a3b8" font-size="9" text-anchor="middle">@injectable · singleton</text>
+        <text x="500" y="528" fill="#34d399" font-size="8" text-anchor="middle">Open-Meteo client</text>
+
+        <!-- External: Open-Meteo -->
+        <rect x="720" y="476" width="200" height="58" rx="6" fill="#0f172a"></rect>
+        <rect x="720" y="476" width="200" height="58" rx="6" fill="rgba(30,41,59,0.5)" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="5,4"></rect>
+        <text x="820" y="503" fill="white" font-size="11" font-weight="600" text-anchor="middle">Open-Meteo API</text>
+        <text x="820" y="519" fill="#94a3b8" font-size="9" text-anchor="middle">external · no API key</text>
+
+        <!-- ⑥ Contracts -->
+        <rect x="110" y="576" width="230" height="58" rx="6" fill="#0f172a"></rect>
+        <rect x="110" y="576" width="230" height="58" rx="6" fill="rgba(136,19,55,0.4)" stroke="#fb7185" stroke-width="1.5"></rect>
+        <text x="225" y="603" fill="white" font-size="11" font-weight="600" text-anchor="middle">keys.ts</text>
+        <text x="225" y="619" fill="#94a3b8" font-size="9" text-anchor="middle">typed DI BindingKeys</text>
+
+        <rect x="660" y="576" width="230" height="58" rx="6" fill="#0f172a"></rect>
+        <rect x="660" y="576" width="230" height="58" rx="6" fill="rgba(136,19,55,0.4)" stroke="#fb7185" stroke-width="1.5"></rect>
+        <text x="775" y="603" fill="white" font-size="11" font-weight="600" text-anchor="middle">schemas.ts</text>
+        <text x="775" y="619" fill="#94a3b8" font-size="9" text-anchor="middle">Zod SSOT · validator + z.infer + MCP schema</text>
+
+        <!-- ============ LEGEND ============ -->
+        <text x="30" y="678" fill="white" font-size="10" font-weight="600">Legend</text>
+
+        <rect x="30" y="690" width="16" height="10" rx="2" fill="rgba(30,41,59,0.5)" stroke="#94a3b8" stroke-width="1"></rect>
+        <text x="52" y="699" fill="#94a3b8" font-size="8">Clients / External</text>
+        <rect x="190" y="690" width="16" height="10" rx="2" fill="rgba(8,51,68,0.4)" stroke="#22d3ee" stroke-width="1"></rect>
+        <text x="212" y="699" fill="#94a3b8" font-size="8">Transports</text>
+        <rect x="320" y="690" width="16" height="10" rx="2" fill="rgba(120,53,15,0.3)" stroke="#fbbf24" stroke-width="1"></rect>
+        <text x="342" y="699" fill="#94a3b8" font-size="8">Composition (DI wiring)</text>
+        <rect x="530" y="690" width="16" height="10" rx="2" fill="rgba(76,29,149,0.4)" stroke="#a78bfa" stroke-width="1"></rect>
+        <text x="552" y="699" fill="#94a3b8" font-size="8">Adapter — MCP tools</text>
+        <rect x="710" y="690" width="16" height="10" rx="2" fill="rgba(6,78,59,0.4)" stroke="#34d399" stroke-width="1"></rect>
+        <text x="732" y="699" fill="#94a3b8" font-size="8">Domain</text>
+        <rect x="830" y="690" width="16" height="10" rx="2" fill="rgba(136,19,55,0.4)" stroke="#fb7185" stroke-width="1"></rect>
+        <text x="852" y="699" fill="#94a3b8" font-size="8">Contracts</text>
+
+        <line x1="30" y1="722" x2="58" y2="722" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrowhead)"></line>
+        <text x="64" y="725" fill="#94a3b8" font-size="8">call / data flow</text>
+        <line x1="200" y1="722" x2="228" y2="722" stroke="#64748b" stroke-width="1.2" stroke-dasharray="4,4"></line>
+        <text x="234" y="725" fill="#94a3b8" font-size="8">DI registration / contract use</text>
+        <text x="470" y="725" fill="#475569" font-size="8">Dependencies flow strictly downward — no runtime cycles.</text>
+      </svg>

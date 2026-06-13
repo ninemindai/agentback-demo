@@ -13,6 +13,18 @@ npm test                        # in-memory MCP session, no process spawn
 npm run console                 # dev web UI at http://localhost:3000/console
 ```
 
+## Architecture
+
+Five layers, dependencies flowing strictly downward (Transports → Composition →
+Adapter → Domain → Contracts). Three transports share one DI wiring.
+
+![weather-mcp architecture](docs/architecture-diagram.png)
+
+See [`docs/architecture.md`](docs/architecture.md) for the layer-by-layer
+breakdown and runtime flow (with an editable Mermaid source). The diagram is
+also available as an interactive, exportable page —
+[`docs/architecture-diagram.html`](docs/architecture-diagram.html).
+
 ## Transports
 
 The same tools and DI wiring (`src/wiring.ts`) are served three ways:
