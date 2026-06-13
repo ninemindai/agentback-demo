@@ -44,15 +44,16 @@ describe('weather-mcp', () => {
       arguments: {},
     });
     expect(res.isError).toBe(true);
-    // The client sees a structured error envelope. NOTE: the location guidance
-    // ("give a city or coordinates") is currently redacted to a generic
-    // `internal_error` because `WeatherService.resolveLocation` throws a plain
-    // `WeatherError` rather than a recognized client (4xx) error — so the
-    // self-correction hint never reaches a real caller. See Framework Signal #7.
+    // The structured envelope reaches the client with the location guidance
+    // intact: WeatherError carries a 400/invalid_input status+code, so the
+    // message survives the envelope instead of being redacted to a generic 500
+    // (this is the self-correction hint an agent needs — see Framework Signal #7).
     const envelope = JSON.parse((res.content as ToolContent)[0].text) as {
-      error?: {code?: string};
+      error?: {code?: string; message?: string; retryable?: boolean};
     };
-    expect(envelope.error?.code).toBeDefined();
+    expect(envelope.error?.code).toBe('invalid_input');
+    expect(envelope.error?.message).toMatch(/city.*latitude.*longitude/i);
+    expect(envelope.error?.retryable).toBe(true);
   });
 
   it('rejects unknown input fields (schema is strict)', async () => {

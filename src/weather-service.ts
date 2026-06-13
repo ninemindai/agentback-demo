@@ -50,8 +50,33 @@ function describeCode(code: number): string {
   return WMO_CODE[code] ?? `Unknown (WMO ${code})`;
 }
 
-/** A self-describing error whose message is safe to surface to the calling agent. */
-export class WeatherError extends Error {}
+/**
+ * A self-describing error whose message is safe to surface to the calling
+ * agent. It carries the `statusCode`/`code`/`publicMessage`/`retryable` fields
+ * the framework's error envelope reads (the same shape as
+ * `@agentback/openapi`'s `AgentError`) — without them a thrown error is
+ * redacted to a generic `internal_error` 500 on both REST and MCP, and the
+ * message never reaches the caller. Defaults to a 400 client error; pass
+ * `{status, code}` for upstream (Open-Meteo) failures.
+ */
+export class WeatherError extends Error {
+  readonly statusCode: number;
+  readonly code: string;
+  readonly publicMessage: string;
+  readonly retryable: boolean;
+
+  constructor(
+    message: string,
+    options: {status?: number; code?: string; retryable?: boolean} = {},
+  ) {
+    super(message);
+    this.name = 'WeatherError';
+    this.statusCode = options.status ?? 400;
+    this.code = options.code ?? 'invalid_input';
+    this.publicMessage = message;
+    this.retryable = options.retryable ?? true;
+  }
+}
 
 async function getJson<T>(url: string, params: Record<string, string | number>): Promise<T> {
   const qs = new URLSearchParams();
@@ -63,11 +88,15 @@ async function getJson<T>(url: string, params: Record<string, string | number>):
     res = await fetch(full, {signal: AbortSignal.timeout(15_000)});
   } catch (err) {
     const reason = err instanceof Error ? err.message : String(err);
-    throw new WeatherError(`Open-Meteo request failed: ${reason}. Please try again.`);
+    throw new WeatherError(
+      `Open-Meteo request failed: ${reason}. Please try again.`,
+      {status: 502, code: 'upstream_error'},
+    );
   }
   if (!res.ok) {
     throw new WeatherError(
       `Open-Meteo returned HTTP ${res.status} ${res.statusText} for ${url.split('/').pop()}.`,
+      {status: 502, code: 'upstream_error'},
     );
   }
   return (await res.json()) as T;
@@ -158,7 +187,11 @@ export class WeatherService {
       wind_speed_unit: input.wind_speed_unit,
     });
     const c = data.current;
-    if (!c) throw new WeatherError('Open-Meteo returned no current observation.');
+    if (!c)
+      throw new WeatherError('Open-Meteo returned no current observation.', {
+        status: 502,
+        code: 'upstream_error',
+      });
     return {
       location: {...loc, timezone: data.timezone ?? loc.timezone},
       observed_at: c.time,
@@ -190,7 +223,11 @@ export class WeatherService {
       wind_speed_unit: input.wind_speed_unit,
     });
     const d = data.daily;
-    if (!d) throw new WeatherError('Open-Meteo returned no forecast data.');
+    if (!d)
+      throw new WeatherError('Open-Meteo returned no forecast data.', {
+        status: 502,
+        code: 'upstream_error',
+      });
     const days = d.time.map((date, i) => ({
       date,
       condition: describeCode(d.weather_code[i]),
