@@ -127,7 +127,7 @@ async function main() {
   const app = new RestApplication({});
   app.restController(GreetingController); // discovered by the REST server (tag)
   app.component(MCPComponent);
-  app.service(MathTools); // discovered by the MCP server (tag)
+  app.service(MathTools); // a tool class is a service — an MCP_SERVERS extension
   await installMcpHttp(app); // POST/GET/DELETE /mcp on the same Express app
   await app.start();
   // REST  : GET /greet/hello/world, POST /greet/add, /openapi.json
@@ -173,9 +173,17 @@ if (isMain(import.meta)) await main();
 - **Discovery is by tag, not a router file.** `@api` tags a controller,
   `@mcpServer` tags a tool class; servers `findByTag` at start. "Add a feature"
   = "add a binding."
-- **`@mcpServer()` is `@bind({tags:{mcpServer:true}})`** — `app.service()` /
-  `app.controller()` read the class's bind metadata and tag automatically; never
-  call `.tag()` manually for these.
+- **`@mcpServer()` is built on `@injectable`** — it makes the class an extension
+  of the `MCP_SERVERS` extension point (`extensionFor: MCP_SERVERS`, singleton by
+  default); `app.service()` / `app.controller()` read that metadata and tag the
+  binding automatically. Never call `.tag()` manually for these.
+- **Register MCP tool classes with `app.service()`** — a tool is a service. The
+  server discovers it as an `MCP_SERVERS` extension and resolves it through its
+  binding, so constructor `@inject` works regardless of registration (`service`,
+  `controller`, or a manual `bind().apply(extensionFor(MCP_SERVERS))`). A dual
+  REST+MCP class (`@api` + `@mcpServer`) needs **both** `restController` (the
+  routes) and `service` (the MCP extension). See
+  [mcp-tools.md](references/mcp-tools.md).
 - **`express` stays on `^4`** here; the schema-typed `client` depends on nothing
   but `zod` (browser-safe).
 - Every source file carries the three-line MIT header

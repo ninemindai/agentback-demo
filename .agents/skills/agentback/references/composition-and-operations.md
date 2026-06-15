@@ -151,10 +151,7 @@ in the OpenAPI spec.
 ### Health (Kubernetes probes)
 
 ```ts
-import {
-  installHealth,
-  registerHealthCheck,
-} from '@agentback/extension-health';
+import {installHealth, registerHealthCheck} from '@agentback/extension-health';
 
 registerHealthCheck(app, 'health.checks.db', {
   name: 'database',
@@ -313,6 +310,77 @@ need `start`/`stop` can omit `init`.
 4. **Tests** live under `src/__tests__/**` (`*.unit.ts`, `*.integration.ts`,
    `*.acceptance.ts`). Vitest picks them up from `dist/__tests__/**/*.js` —
    always `pnpm build` before `pnpm test`.
+
+## Testing an app
+
+`@agentback/testing`'s `createTestApp` boots an app on an ephemeral port and
+hands back a typed REST `client`, raw `supertest`, and an in-memory `mcp` client
+(SDK `Client`) — `await using` disposes it:
+
+```ts
+import {createTestApp} from '@agentback/testing';
+
+await using t = await createTestApp(() => new Application({stdio: false}));
+const {tools} = await t.mcp.listTools(); // in-memory MCP — no transport
+const res = await t.client.get('/greet/hello/world'); // typed REST client
+await t.supertest.post('/mcp').set('x-api-key', 'k'); // status/header asserts
+```
+
+For HTTP-gate behavior the in-memory `mcp` client can't see — auth `401`s, rate
+`429`s — drive the real Express stack with raw `fetch` against `t.url`/the server
+URL.
+
+**Make entries testable.** An entry file that builds _and starts_ the server at
+module top level can't be imported by a test. Export a factory that builds (not
+starts) the app, and guard the run with `isMain`:
+
+```ts
+export async function buildApp(opts = {}) {
+  /* … new RestApplication(); installMcpHttp(app, …); return app; */
+}
+if (isMain(import.meta)) {
+  const app = await buildApp({port: Number(process.env.PORT ?? 3000)});
+  await app.start();
+}
+```
+
+Now `npm start` runs the server while a test imports `buildApp`, starts it on
+port `0`, and asserts against it.
+
+### Serverless deployment (`listen: false`)
+
+The same `buildApp` factory also deploys to a serverless platform (Vercel,
+AWS Lambda). Set `listen: false` on the RestServer config: `app.start()` then
+mounts every route — middleware, controllers, framework routes (`/openapi.json`,
+explorers, …) — but **skips `app.listen()`**. The platform owns the HTTP
+listener; you hand it the fully-mounted Express app via `RestServer.expressApp`.
+
+```ts
+export async function buildApp({listen = true} = {}) {
+  const app = new RestApplication({rest: {listen}});
+  // … register controllers / services / installConsole / installMcpHttp …
+  await app.start();            // listen:false → routes mounted, no port bound
+  return app;
+}
+
+// api/index.ts (Vercel) — one function for the whole app, built once (memoized)
+let appP;
+export default async function handler(req, res) {
+  appP ??= buildApp({listen: false}).then(async a => (await a.restServer).expressApp);
+  (await appP)(req, res);
+}
+```
+
+`new RestApplication({rest: {listen: false}})` is the toggle; default `true`
+binds a port as a normal long-running server. Two deploy notes:
+
+- **On-disk static assets** served by `installConsole` / `rest-explorer` (the
+  console client bundle, `swagger-ui-dist`) are read at runtime, not imported,
+  so the platform's file tracer misses them — list them in Vercel's
+  `includeFiles` (or the equivalent) for the function.
+- **Workspace symlinks** (pnpm `workspace:*`) break serverless function
+  packaging; deploy from a project that installs `@agentback/*` as normal
+  (copied) dependencies.
 
 ## Key Rules
 

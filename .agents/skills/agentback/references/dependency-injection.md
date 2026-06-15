@@ -164,12 +164,7 @@ and namespace — directly to a class. `createBindingFromClass` reads it when
 registering the class.
 
 ```ts
-import {
-  injectable,
-  bind,
-  BindingScope,
-  ContextTags,
-} from '@agentback/core';
+import {injectable, bind, BindingScope, ContextTags} from '@agentback/core';
 
 // Equivalent forms — @bind is the shorter alias
 @injectable({
@@ -201,7 +196,7 @@ import {MCPApplication} from '@agentback/mcp'; // pre-mounts MCPComponent
 import {MCPComponent} from '@agentback/mcp';
 
 const restApp = new RestApplication({name: 'api'});
-restApp.restController(HelloController); // tags binding with REST_CONTROLLER_TAG
+restApp.restController(HelloController); // tags binding CoreTags.CONTROLLER (RestServer discovers it)
 restApp.component(MCPComponent); // hybrid REST + MCP
 
 await restApp.start(); // init() → start() on all lifecycle observers
@@ -212,7 +207,7 @@ await restApp.stop(); // stop() in reverse order
 
 ```ts
 app.controller(MyController); // CoreTags.CONTROLLER, TRANSIENT scope
-app.restController(MyRestController); // adds REST_CONTROLLER_TAG for discovery
+app.restController(MyRestController); // alias for app.controller(); RestServer discovers by CoreTags.CONTROLLER
 app.service(MyService); // CoreTags.SERVICE, SINGLETON scope
 app.server(MyServer); // CoreTags.SERVER + asLifeCycleObserver, SINGLETON
 app.component(MyComponent); // recursively mounts the component
@@ -307,8 +302,8 @@ at `start()` via `ctx.findByTag(tag)` — no central registry to edit.
 import {mcpServer, tool} from '@agentback/mcp';
 import {z} from 'zod';
 
-// @mcpServer() = @bind({tags: {mcpServer: true, [ContextTags.NAME]: name}})
-// MCPServer calls ctx.findByTag('mcpServer') at start to enumerate tool providers.
+// @mcpServer() = @injectable({scope: SINGLETON}, extensionFor(MCP_SERVERS))
+// MCPServer calls ctx.find(extensionFilter(MCP_SERVERS)) at start to enumerate tools.
 @mcpServer()
 export class WeatherService {
   @tool('forecast', {input: ForecastIn, output: ForecastOut})
@@ -323,7 +318,7 @@ export class WeatherService {
 app.service(WeatherService);
 ```
 
-Parallel pattern: `RestServer` uses `ctx.findByTag(REST_CONTROLLER_TAG)` to
+Parallel pattern: `RestServer` uses `ctx.findByTag(CoreTags.CONTROLLER)` to
 mount routes; `LifeCycleObserverRegistry` uses
 `filterByTag(CoreTags.LIFE_CYCLE_OBSERVER)` to drive `init`/`start`/`stop`.
 
