@@ -1,5 +1,7 @@
 # weather-mcp
 
+[![deploy status](https://img.shields.io/website?url=https%3A%2F%2Fagentback-demo.vercel.app%2F&label=vercel&up_message=live&up_color=brightgreen&down_message=down&down_color=red)](https://agentback-demo.vercel.app/)
+
 An MCP server built on [AgentBack](https://agentback.dev) that exposes weather
 data from the free [Open-Meteo](https://open-meteo.com) API — **no API key
 required**. Decorator-driven tools with Zod input/output schemas, served over
