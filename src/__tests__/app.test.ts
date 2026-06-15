@@ -15,14 +15,13 @@ import {Application} from '../application.js';
 type ToolContent = Array<{type: string; text: string}>;
 
 describe('weather-mcp', () => {
-  it('registers the weather tools and the observations tool', async () => {
+  it('registers the three weather tools', async () => {
     await using t = await createTestApp(() => new Application({stdio: false}));
     const names = (await t.mcp.listTools()).tools.map(x => x.name).sort();
     expect(names).toEqual([
       'geocode_location',
       'get_current_weather',
       'get_forecast',
-      'summarize_observations',
     ]);
   });
 
