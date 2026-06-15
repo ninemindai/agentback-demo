@@ -1,0 +1,11 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "npm run build",
+  "outputDirectory": "public",
+  "functions": {
+    "api/index.ts": {
+      "includeFiles": "node_modules/{@agentback/console/dist/client,swagger-ui-dist}/**"
+    }
+  },
+  "rewrites": [{"source": "/(.*)", "destination": "/api"}]
+}

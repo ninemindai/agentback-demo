@@ -5,6 +5,10 @@ data from the free [Open-Meteo](https://open-meteo.com) API — **no API key
 required**. Decorator-driven tools with Zod input/output schemas, served over
 stdio, Streamable HTTP, or a dev console from one set of DI wiring.
 
+**🔭 Live demo:** **[agentback-demo.vercel.app](https://agentback-demo.vercel.app/)** —
+the AgentBack dev console (Context · API · MCP · Schema panels), deployed
+serverless on Vercel.
+
 ```bash
 npm install
 npm run build && npm start      # stdio MCP server (for Claude Desktop / Cursor)
@@ -69,6 +73,11 @@ The console serves over HTTP, so it runs a `RestApplication` (`src/console.ts`)
 that reuses the exact same tool wiring as the stdio server (`src/wiring.ts`).
 It's a development tool — the stdio entry point (`src/main.ts`) is what you wire
 into Claude Desktop / Cursor.
+
+A hosted instance is live at **[agentback-demo.vercel.app](https://agentback-demo.vercel.app/)**.
+The same `buildConsoleApp()` runs there serverless: `src/console.ts` exposes it
+with `listen: false` (mounts every route, binds no port) and `api/index.ts`
+hands the Express app to Vercel. See `vercel.json` for the deploy config.
 
 ## Tools
 

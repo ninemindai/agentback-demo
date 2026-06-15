@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>weather-mcp — AgentBack console</title>
+    <style>
+      :root { color-scheme: light dark; }
+      body {
+        font: 16px/1.6 ui-serif, Georgia, "Times New Roman", serif;
+        max-width: 42rem; margin: 12vh auto; padding: 0 1.25rem;
+        color: #1a1a1a; background: #f7f5ef;
+      }
+      @media (prefers-color-scheme: dark) {
+        body { color: #ece9e0; background: #14130f; }
+        a { color: #9ab8ff; }
+      }
+      h1 { font-size: 2rem; margin: 0 0 .25rem; letter-spacing: -.01em; }
+      .sub { font-style: italic; opacity: .7; margin: 0 0 2rem; }
+      ul { list-style: none; padding: 0; }
+      li { margin: .6rem 0; }
+      a { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .95rem; }
+      .desc { font-family: ui-serif, Georgia, serif; opacity: .65; }
+      footer { margin-top: 3rem; font-size: .8rem; opacity: .5; }
+    </style>
+  </head>
+  <body>
+    <h1>weather-mcp</h1>
+    <p class="sub">A weather MCP + REST service, with the AgentBack developer console — deployed serverless on Vercel.</p>
+    <ul>
+      <li><a href="/console/">/console/</a> — <span class="desc">the unified console (Context · API · MCP · Schema)</span></li>
+      <li><a href="/openapi.json">/openapi.json</a> — <span class="desc">the auto-assembled OpenAPI 3.1 spec</span></li>
+    </ul>
+    <footer>Built with <a href="https://agentback.dev">AgentBack</a> · <a href="https://github.com/ninemindai/agentback-demo">source</a>.</footer>
+  </body>
+</html>
