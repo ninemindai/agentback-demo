@@ -6,11 +6,17 @@
 //
 // This is a development/showcase tool, not the production server — the stdio
 // entry point (main.ts) is what you wire into Claude Desktop / Cursor.
+import {fileURLToPath} from 'node:url';
+import express from 'express';
 import {RestApplication} from '@agentback/rest';
 import {installConsole} from '@agentback/console';
 import {isMain} from '@agentback/core';
 import {registerWeatherMcp} from './wiring.js';
 import {ObservationsController} from './observations.controller.js';
+
+// The static landing + observations UI. Resolved relative to this module
+// (dist/console.js → ../public) so it works regardless of cwd.
+const PUBLIC_DIR = fileURLToPath(new URL('../public', import.meta.url));
 
 /**
  * Build and start the console app. Shared by the CLI entry (below) and the
@@ -32,6 +38,11 @@ export async function buildConsoleApp(opts: {listen?: boolean} = {}) {
   // has no RestServer). The MCP summarize_observations tool comes from the
   // shared component, so it works on stdio too.
   app.restController(ObservationsController);
+
+  // Serve public/ (index.html, observations.html) so `npm run console` is a
+  // complete local experience. In production Vercel serves these from its CDN
+  // (this static mount is then a harmless no-op — the CDN answers first).
+  (await app.restServer).expressApp.use(express.static(PUBLIC_DIR));
 
   await installConsole(app, {
     title: 'weather-mcp console',
