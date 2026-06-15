@@ -10,6 +10,7 @@ import {RestApplication} from '@agentback/rest';
 import {installConsole} from '@agentback/console';
 import {isMain} from '@agentback/core';
 import {registerWeatherMcp} from './wiring.js';
+import {ObservationsController} from './observations.controller.js';
 
 /**
  * Build and start the console app. Shared by the CLI entry (below) and the
@@ -26,6 +27,11 @@ export async function buildConsoleApp(opts: {listen?: boolean} = {}) {
   // stdio:false — the console introspects the MCP server in-process; we don't
   // want it grabbing stdin while an HTTP server is running.
   registerWeatherMcp(app, false);
+
+  // REST file upload/download lives on the HTTP surface only (the stdio entry
+  // has no RestServer). The MCP summarize_observations tool comes from the
+  // shared component, so it works on stdio too.
+  app.restController(ObservationsController);
 
   await installConsole(app, {
     title: 'weather-mcp console',
