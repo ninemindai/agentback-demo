@@ -13,6 +13,7 @@ import {installConsole} from '@agentback/console';
 import {isMain} from '@agentback/core';
 import {registerWeatherMcp} from './wiring.js';
 import {ObservationsController} from './observations.controller.js';
+import {WeatherController} from './weather.controller.js';
 
 // The static landing + observations UI. Resolved relative to this module
 // (dist/console.js → ../public) so it works regardless of cwd.
@@ -38,6 +39,8 @@ export async function buildConsoleApp(opts: {listen?: boolean} = {}) {
   // has no RestServer). The MCP summarize_observations tool comes from the
   // shared component, so it works on stdio too.
   app.restController(ObservationsController);
+  // REST wrapper over the weather tools so the browser UI can fetch forecasts.
+  app.restController(WeatherController);
 
   // Serve public/ (index.html, observations.html) so `npm run console` is a
   // complete local experience. In production Vercel serves these from its CDN
