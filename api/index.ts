@@ -21,10 +21,12 @@ import {buildConsoleApp} from '../dist/console.js';
 
 let appPromise: Promise<RequestListener> | undefined;
 
-function getExpressApp(): Promise<RequestListener> {
-  return (appPromise ??= buildConsoleApp({listen: false}).then(
+async function getExpressApp(): Promise<RequestListener> {
+  // Memoized: the first call builds the app; warm invocations reuse the promise.
+  appPromise ??= buildConsoleApp({listen: false}).then(
     async app => (await app.restServer).expressApp as unknown as RequestListener,
-  ));
+  );
+  return appPromise;
 }
 
 export default async function handler(
