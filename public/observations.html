@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>weather-mcp — observations upload</title>
+    <style>
+      :root { color-scheme: light dark; }
+      body {
+        font: 16px/1.6 ui-serif, Georgia, "Times New Roman", serif;
+        max-width: 42rem; margin: 8vh auto; padding: 0 1.25rem;
+        color: #1a1a1a; background: #f7f5ef;
+      }
+      a { color: #1a4fff; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .95rem; }
+      @media (prefers-color-scheme: dark) {
+        body { color: #ece9e0; background: #14130f; }
+        a { color: #9ab8ff; }
+        .drop { border-color: #4a473d; }
+        .card, .err { background: #1c1b16; }
+      }
+      h1 { font-size: 1.9rem; margin: 0 0 .25rem; letter-spacing: -.01em; }
+      .sub { font-style: italic; opacity: .7; margin: 0 0 2rem; }
+      .back { font-size: .85rem; }
+      .drop {
+        display: block;
+        border: 2px dashed #cfc9b8; border-radius: .75rem; padding: 2.2rem 1rem;
+        text-align: center; cursor: pointer; transition: border-color .15s, background .15s;
+      }
+      .drop.over { border-color: #1a4fff; background: rgba(26,79,255,.06); }
+      .drop input { display: none; }
+      .row { margin-top: 1rem; display: flex; gap: .75rem; align-items: center; flex-wrap: wrap; }
+      button {
+        font: inherit; font-size: .9rem; padding: .45rem .9rem; border-radius: .5rem;
+        border: 1px solid #cfc9b8; background: transparent; color: inherit; cursor: pointer;
+      }
+      button.primary { border-color: #1a4fff; }
+      .card, .err {
+        margin-top: 1.5rem; padding: 1.1rem 1.3rem; border-radius: .75rem;
+        background: #fffdf7; border: 1px solid #e7e1d0;
+      }
+      .err { border-color: #d98; }
+      .stat { display: grid; grid-template-columns: auto 1fr; gap: .15rem 1rem; font-family: ui-monospace, Menlo, monospace; font-size: .9rem; }
+      .stat dt { opacity: .6; }
+      .stat dd { margin: 0; }
+      .muted { opacity: .6; font-size: .85rem; }
+      code { font-family: ui-monospace, Menlo, monospace; }
+    </style>
+  </head>
+  <body>
+    <p class="back"><a href="/">← weather-mcp</a></p>
+    <h1>Observations upload</h1>
+    <p class="sub">
+      Drop a CSV of weather observations (a <code>date</code> column and a
+      temperature column, e.g. <code>temp_c</code>). It streams to the server's
+      <code>FileStore</code>, gets parsed and summarized, and the same file is
+      then summarizable by the <code>summarize_observations</code> MCP tool.
+    </p>
+
+    <label class="drop" id="drop">
+      <input type="file" id="file" accept=".csv,text/csv" />
+      <div><strong>Drop a CSV here</strong> or click to choose</div>
+      <div class="muted">max 2&nbsp;MB · text/csv</div>
+    </label>
+
+    <div class="row">
+      <button class="primary" id="upload" disabled>Upload &amp; summarize</button>
+      <button id="sample">Use sample data</button>
+      <span class="muted" id="chosen"></span>
+    </div>
+
+    <div id="result"></div>
+
+    <script>
+      const SAMPLE = [
+        'date,temp_c',
+        '2026-01-01,3.2',
+        '2026-01-02,5.0',
+        '2026-01-03,-1.5',
+        '2026-01-04,2.1',
+        '2026-01-05,6.8',
+      ].join('\n') + '\n';
+
+      const fileInput = document.getElementById('file');
+      const drop = document.getElementById('drop');
+      const uploadBtn = document.getElementById('upload');
+      const sampleBtn = document.getElementById('sample');
+      const chosen = document.getElementById('chosen');
+      const result = document.getElementById('result');
+      let picked = null; // {blob, name}
+
+      function setPicked(blob, name) {
+        picked = {blob, name};
+        chosen.textContent = name + ' (' + blob.size + ' bytes)';
+        uploadBtn.disabled = false;
+      }
+
+      fileInput.addEventListener('change', () => {
+        const f = fileInput.files[0];
+        if (f) setPicked(f, f.name);
+      });
+      sampleBtn.addEventListener('click', () => {
+        setPicked(new Blob([SAMPLE], {type: 'text/csv'}), 'sample.csv');
+      });
+
+      ['dragover', 'dragenter'].forEach(e =>
+        drop.addEventListener(e, ev => { ev.preventDefault(); drop.classList.add('over'); }),
+      );
+      ['dragleave', 'drop'].forEach(e =>
+        drop.addEventListener(e, ev => { ev.preventDefault(); drop.classList.remove('over'); }),
+      );
+      drop.addEventListener('drop', ev => {
+        const f = ev.dataTransfer.files[0];
+        if (f) setPicked(f, f.name);
+      });
+
+      uploadBtn.addEventListener('click', async () => {
+        if (!picked) return;
+        uploadBtn.disabled = true;
+        result.innerHTML = '<p class="muted">Uploading…</p>';
+        try {
+          const form = new FormData();
+          form.append('file', picked.blob, picked.name);
+          const res = await fetch('/observations/', {method: 'POST', body: form});
+          const body = await res.json().catch(() => ({}));
+          if (!res.ok) {
+            const msg = (body.error && body.error.message) || ('HTTP ' + res.status);
+            result.innerHTML =
+              '<div class="err"><strong>Upload failed</strong> — ' +
+              escapeHtml(msg) + ' <span class="muted">(' +
+              ((body.error && body.error.code) || res.status) + ')</span></div>';
+            return;
+          }
+          renderSummary(body);
+        } catch (err) {
+          result.innerHTML = '<div class="err"><strong>Error</strong> — ' + escapeHtml(String(err)) + '</div>';
+        } finally {
+          uploadBtn.disabled = false;
+        }
+      });
+
+      function renderSummary(b) {
+        const s = b.summary;
+        result.innerHTML =
+          '<div class="card">' +
+          '<strong>' + escapeHtml(b.filename) + '</strong>' +
+          '<dl class="stat">' +
+          row('rows', s.count) +
+          row('min °C', s.temperatureC.min) +
+          row('max °C', s.temperatureC.max) +
+          row('mean °C', s.temperatureC.mean) +
+          row('from', s.dateRange.from) +
+          row('to', s.dateRange.to) +
+          '</dl>' +
+          '<p class="row">' +
+          '<a href="/observations/' + encodeURIComponent(b.id) + '/report">⬇ download report (CSV)</a>' +
+          '</p>' +
+          '<p class="muted">id <code>' + escapeHtml(b.id) + '</code> — also summarizable via the ' +
+          '<code>summarize_observations</code> MCP tool.</p>' +
+          '</div>';
+      }
+      function row(k, v) { return '<dt>' + k + '</dt><dd>' + escapeHtml(String(v)) + '</dd>'; }
+      function escapeHtml(s) {
+        return s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+      }
+    </script>
+  </body>
+</html>
