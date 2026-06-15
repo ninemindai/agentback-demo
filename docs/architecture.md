@@ -1,8 +1,10 @@
 # Architecture
 
 `weather-mcp` is one deployable service (~600 LOC) that exposes Open-Meteo
-weather data as MCP tools, served three ways from a single DI wiring. The code
-is organized into five layers with dependencies flowing strictly **downward**:
+weather data as MCP tools, served three ways from a single DI wiring (stdio,
+Streamable HTTP, and a dev console — the console also runs serverless on Vercel
+at [agentback-demo.vercel.app](https://agentback-demo.vercel.app/)). The code is
+organized into five layers with dependencies flowing strictly **downward**:
 Transports → Composition → Adapter → Domain → Contracts.
 
 ![weather-mcp architecture](./architecture-diagram.png)
@@ -19,6 +21,7 @@ graph TD
     main["main.ts (stdio)"]
     serveHttp["serve-http.ts (HTTP + auth + rate-limit)"]
     console["console.ts (dev console)"]
+    api["api/index.ts (Vercel serverless)"]
   end
 
   subgraph Composition
@@ -44,6 +47,7 @@ graph TD
   application --> wiring
   serveHttp --> wiring
   console --> wiring
+  api -->|buildConsoleApp listen:false| console
   wiring --> component
   component --> tools
   component --> service
@@ -58,7 +62,7 @@ graph TD
   classDef clean fill:#51cf66,stroke:#2b8a3e,color:#fff
 
   class service warning
-  class main,serveHttp,console,application,wiring,component,keys,tools,schemas clean
+  class main,serveHttp,console,api,application,wiring,component,keys,tools,schemas clean
 ```
 
 Dependencies flow strictly downward. No runtime cycles. `wiring.ts` and
@@ -70,7 +74,7 @@ centralization is the design thesis, not a blast-radius defect.
 
 | Layer | File(s) | Responsibility |
 | ----- | ------- | -------------- |
-| **Transports** | `main.ts`, `serve-http.ts`, `console.ts` | Three entry points (stdio / Streamable HTTP / dev console). Each adapts a runtime to the shared wiring; `serve-http.ts` adds API-key auth + per-(caller, tool) rate limiting. |
+| **Transports** | `main.ts`, `serve-http.ts`, `console.ts`, `api/index.ts` | Entry points (stdio / Streamable HTTP / dev console). Each adapts a runtime to the shared wiring; `serve-http.ts` adds API-key auth + per-(caller, tool) rate limiting. `api/index.ts` is a thin Vercel wrapper over `console.ts`'s `buildConsoleApp({listen: false})` — same routes, no port bound, the platform owns the listener. |
 | **Composition** | `application.ts`, `wiring.ts`, `component.ts`, `keys.ts` | The composition root. `wiring.ts` (`registerWeatherMcp`) is the single assembly path all transports call; `component.ts` packages the DI contributions; `keys.ts` holds typed `BindingKey`s. |
 | **Adapter** | `tools/weather.tools.ts` | The `@mcpServer()` tool class — an extension of the `MCP_SERVERS` extension point. Each `@tool` carries its Zod I/O schemas and delegates to the injected `WeatherService`. |
 | **Domain** | `weather-service.ts` | Stateless `@injectable` singleton: the Open-Meteo client. WMO-code translation, unit fallback, and response shaping live here. |
@@ -88,6 +92,20 @@ centralization is the design thesis, not a blast-radius defect.
    `WeatherService`.
 4. **`weather-service.ts`** calls the **Open-Meteo API** over HTTPS, shapes the
    response, and validates the output against the schema on the way back.
+
+## Deployment
+
+The console transport runs two ways from the **same** `buildConsoleApp()`:
+
+- **Long-running** — `npm run console` calls `app.start()` with `listen: true`,
+  binding a port (local dev / a persistent host).
+- **Serverless** — on Vercel, `api/index.ts` calls `buildConsoleApp({listen:
+  false})`: `app.start()` mounts every route but binds no port, and the handler
+  hands Vercel the app's `expressApp`. `vercel.json` rewrites all paths to the
+  function and `includeFiles`-traces the on-disk static assets (the console
+  client bundle + `swagger-ui-dist`) that nft can't follow on its own. Live at
+  [agentback-demo.vercel.app](https://agentback-demo.vercel.app/); pushes to
+  `main` auto-deploy.
 
 ## Known structural note
 
