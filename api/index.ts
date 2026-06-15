@@ -6,8 +6,10 @@
 // (cold start) builds the app; warm invocations reuse the same promise.
 //
 // `vercel.json` rewrites every path to this function, so `/console/`,
-// `/openapi.json`, `/mcp`, and the panel APIs all resolve here. (`/` is served
-// by the static `public/index.html` landing page.)
+// `/openapi.json`, and the panel APIs (context/schema/MCP inspector) all
+// resolve here. (`/` is served by the static `public/index.html` landing page.)
+// This console entry does not mount the Streamable HTTP MCP transport, so there
+// is no `/mcp` route here — that lives in serve-http.ts.
 //
 // The app is typed as a Node `RequestListener` — an Express app is one, and
 // this avoids depending on express's `Express` type across the .d.ts boundary
