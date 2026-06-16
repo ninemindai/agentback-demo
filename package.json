@@ -11,7 +11,8 @@
     "serve:http": "node dist/serve-http.js",
     "console": "node dist/console.js",
     "test": "vitest run",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "verify:fetch": "node dist/verify-fetch.js"
   },
   "dependencies": {
     "@agentback/authentication": "link:../agentback/packages/authentication",
