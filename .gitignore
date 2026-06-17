@@ -18,3 +18,9 @@ npm-debug.log*
 
 # Vercel
 .vercel
+
+# This repo is npm-managed (package-lock.json + `npm ci` in CI), matching the
+# `create agentback` consumer setup. pnpm is only used on the local-link verify
+# branch to test against unpublished framework packages — ignore its lockfile so
+# it doesn't compete with package-lock.json.
+pnpm-lock.yaml
