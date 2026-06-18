@@ -24,3 +24,7 @@ npm-debug.log*
 # branch to test against unpublished framework packages — ignore its lockfile so
 # it doesn't compete with package-lock.json.
 pnpm-lock.yaml
+
+# brooks-lint analysis output (regenerated per run)
+.brooks-lint-history.json
+brooks-lint-*.md
