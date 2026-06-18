@@ -19,6 +19,16 @@ import type {RequestListener} from 'node:http';
 import type {VercelRequest, VercelResponse} from '@vercel/node';
 import {buildConsoleApp} from '../dist/console.js';
 
+// Vercel's serverless bundler (node-file-trace) follows only STATIC imports, so
+// it can't see @agentback/rest's lazy `createRequire('express')`/`('cors')` —
+// the optional peer deps it loads on the Express host (kept lazy so an edge
+// build stays Express-free). Without these side-effect imports they're omitted
+// from the deployed function ("Cannot find module 'cors'"). Importing them here
+// pulls them + their transitive deps into the trace. This entry is the
+// Node/Express host (never edge), so a static express/cors import is correct.
+import 'express';
+import 'cors';
+
 let appPromise: Promise<RequestListener> | undefined;
 
 async function buildExpressApp(): Promise<RequestListener> {
