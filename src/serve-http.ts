@@ -22,7 +22,7 @@ import {
   AuthenticationBindings,
 } from '@agentback/authentication';
 import {securityId} from '@agentback/security';
-import {registerWeatherMcp} from './wiring.js';
+import {registerWeatherMcp, WEATHER_OPENAPI_SPEC} from './wiring.js';
 
 // --- API keys → principals (each key grants the `mcp:tools` scope) -----------
 export type Principal = {[securityId]: string; name: string; scopes: string[]};
@@ -81,12 +81,13 @@ export async function buildHttpApp(
 ): Promise<RestApplication> {
   const keys = options.keys ?? loadKeys();
 
-  const app = new RestApplication();
-  // The RestServer reads its port via @config() on its own binding (the
-  // constructor `{rest:{port}}` option is not wired through in this version).
-  app.configure('servers.RestServer').to({
-    port: options.port ?? 3000,
-    ...(options.host ? {host: options.host} : {}),
+  const app = new RestApplication({
+    rest: {
+      port: options.port ?? 3000,
+      ...(options.host ? {host: options.host} : {}),
+      // Brand /openapi.json as weather-mcp instead of the framework default.
+      openApiSpec: WEATHER_OPENAPI_SPEC,
+    },
   });
 
   // stdio:false — HTTP is the transport here; the MCP server is driven per

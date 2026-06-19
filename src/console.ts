@@ -9,7 +9,7 @@
 import {RestApplication} from '@agentback/rest';
 import {installConsole} from '@agentback/console';
 import {isMain} from '@agentback/core';
-import {registerWeatherMcp} from './wiring.js';
+import {registerWeatherMcp, WEATHER_OPENAPI_SPEC} from './wiring.js';
 
 /**
  * Build and start the console app. Shared by the CLI entry (below) and the
@@ -21,7 +21,9 @@ import {registerWeatherMcp} from './wiring.js';
  */
 export async function buildConsoleApp(opts: {listen?: boolean} = {}) {
   // PORT (when bound) is resolved by RestApplication from the env automatically.
-  const app = new RestApplication({rest: {listen: opts.listen ?? true}});
+  const app = new RestApplication({
+    rest: {listen: opts.listen ?? true, openApiSpec: WEATHER_OPENAPI_SPEC},
+  });
 
   // stdio:false — the console introspects the MCP server in-process; we don't
   // want it grabbing stdin while an HTTP server is running.

@@ -2,6 +2,20 @@ import type {Application as CoreApplication} from '@agentback/core';
 import {WeatherComponent} from './component.js';
 
 /**
+ * OpenAPI `info` for the HTTP surface, shared by the REST app and the console
+ * so `/openapi.json` and the Swagger explorer brand as weather-mcp rather than
+ * inheriting the framework's generic default title. Mirrors the MCP server's
+ * name/version registered in {@link registerWeatherMcp}.
+ *
+ * Pass to `new RestApplication({rest: {openApiSpec: WEATHER_OPENAPI_SPEC}})`.
+ */
+export const WEATHER_OPENAPI_SPEC = {
+  overrides: {
+    info: {title: 'weather-mcp', version: '0.1.0'},
+  },
+} as const;
+
+/**
  * Register the weather MCP surface onto any AgentBack application — works for
  * both the stdio `Application` and the HTTP `RestApplication` used by the
  * console, since both extend the core `Application` (a `Context`).
